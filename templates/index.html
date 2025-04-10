@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Library Management System (APS New Cantt, Prayagraj)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { 
+            background-color: #222222; 
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .main-container {
+            width: 600px;
+            max-width: 100%;
+        }
+        .welcome-text {
+            font-size: 36px;
+            text-align: center;
+            margin: 20px 0 40px 0;
+        }
+        .btn-custom {
+            width: 100%;
+            height: 60px;
+            margin: 5px 0;
+            font-size: 18px;
+            border: none;
+            background-color: #1976D2;
+            color: white;
+            border-radius: 4px;
+        }
+        .btn-custom:hover {
+            background-color: #1565C0;
+        }
+        .btn-delete {
+            background-color: #dc3545;
+        }
+        .btn-delete:hover {
+            background-color: #bb2d3b;
+        }
+        .btn-download {
+            background-color: #198754;
+        }
+        .btn-download:hover {
+            background-color: #157347;
+        }
+        .modal-content {
+            background-color: #333;
+            color: white;
+        }
+        .modal input {
+            background-color: #444;
+            color: white;
+            border: 1px solid #666;
+        }
+        .modal input:focus {
+            background-color: #555;
+            color: white;
+            border-color: #888;
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="welcome-text">Welcome</div>
+        
+        <button class="btn-custom" onclick="showModal('add')">Add Book</button>
+        <button class="btn-custom btn-delete" onclick="showModal('delete')">Delete Book</button>
+        <a href="/download_books" class="btn-custom btn-download text-decoration-none text-center d-flex align-items-center justify-content-center">Download List of Books</a>
+        <button class="btn-custom" onclick="showModal('issue')">Issue Book to Student</button>
+        <button class="btn-custom" onclick="showModal('return')">Return Book</button>
+        <button class="btn-custom" onclick="showModal('view')">View Issued Books</button>
+    </div>
+
+    <!-- Modal structure remains the same -->
+    <div class="modal fade" id="bookModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle"></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="bookId" class="form-label">Book ID:</label>
+                        <input type="text" id="bookId" class="form-control bg-dark text-white">
+                    </div>
+                    <div class="mb-3">
+                        <label for="bookName" class="form-label">Book Name:</label>
+                        <input type="text" id="bookName" class="form-control bg-dark text-white">
+                    </div>
+                    <div class="mb-3">
+                        <label for="authorName" class="form-label">Author Name:</label>
+                        <input type="text" id="authorName" class="form-control bg-dark text-white">
+                    </div>
+                    <div class="mb-3">
+                        <label for="bookPrice" class="form-label">Book Price:</label>
+                        <input type="number" id="bookPrice" class="form-control bg-dark text-white">
+                    </div>
+                    <div class="mb-3">
+                        <label for="bookQty" class="form-label">Book Qty:</label>
+                        <input type="number" id="bookQty" class="form-control bg-dark text-white">
+                    </div>
+                    <div class="mb-3">
+                        <label for="studentId" class="form-label">Student ID:</label>
+                        <input type="text" id="studentId" class="form-control bg-dark text-white">
+                    </div>
+                    <div class="mb-3">
+                        <label for="returnDate" class="form-label">Return Date:</label>
+                        <input type="date" id="returnDate" class="form-control bg-dark text-white">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="submitButton">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentAction = '';
+        const modal = new bootstrap.Modal(document.getElementById('bookModal'));
+
+        function showModal(action) {
+            if (action === 'view') {
+                window.open('/view_issued_books', '_blank', 'width=800,height=600');
+                return;
+            }
+
+            currentAction = action;
+            const titles = {
+                'add': 'Add Books',
+                'delete': 'Delete Book',
+                'issue': 'Issue Book',
+                'return': 'Return Book'
+            };
+            
+            // Show/hide fields based on action
+            const allFields = ['bookId', 'bookName', 'authorName', 'bookPrice', 'bookQty', 'studentId', 'returnDate'];
+            allFields.forEach(field => {
+                const fieldElement = document.getElementById(field).parentElement;
+                if (action === 'add') {
+                    fieldElement.style.display = field !== 'studentId' && field !== 'returnDate' ? 'block' : 'none';
+                } else if (action === 'issue' || action === 'return') {
+                    fieldElement.style.display = (field === 'bookId' || field === 'studentId' || field === 'returnDate') ? 'block' : 'none';
+                } else {
+                    fieldElement.style.display = field === 'bookId' ? 'block' : 'none';
+                }
+            });
+
+            document.getElementById('modalTitle').textContent = titles[action];
+            // Clear all inputs
+            allFields.forEach(field => {
+                document.getElementById(field).value = '';
+            });
+            modal.show();
+        }
+
+        document.getElementById('submitButton').onclick = function() {
+            if (!validateForm()) return;
+
+            const bookData = {
+                bookId: document.getElementById('bookId').value,
+                bookName: document.getElementById('bookName').value,
+                authorName: document.getElementById('authorName').value,
+                bookPrice: document.getElementById('bookPrice').value,
+                bookQty: document.getElementById('bookQty').value,
+                studentId: document.getElementById('studentId').value,
+                returnDate: document.getElementById('returnDate').value
+            };
+
+            const endpoints = {
+                'add': '/add_book',
+                'delete': '/delete_book',
+                'issue': '/issue_book',
+                'return': '/return_book'
+            };
+
+            fetch(endpoints[currentAction], {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(bookData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.status === 'success') {
+                    location.reload();
+                }
+            });
+            modal.hide();
+        };
+
+        function validateForm() {
+            const requiredFields = {
+                'add': ['bookId', 'bookName', 'authorName', 'bookPrice', 'bookQty'],
+                'delete': ['bookId'],
+                'issue': ['bookId', 'studentId', 'returnDate'],
+                'return': ['bookId', 'studentId']
+            };
+
+            const fields = requiredFields[currentAction];
+            for (const field of fields) {
+                const value = document.getElementById(field).value;
+                if (!value) {
+                    alert(`Please fill in the ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
+                    return false;
+                }
+            }
+            return true;
+        }
+    </script>
+</body>
+</html>
